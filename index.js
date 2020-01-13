@@ -80,6 +80,7 @@ server.get('/api/projects_resources', async (req, res, next) => {
       .leftJoin('projects as p', 'pr.project_id', 'p.id')
       .leftJoin('resources as r', 'pr.resource_id', 'r.id')
       .select(
+        'pr.id',
         'pr.project_id',
         'p.name as project_name',
         'pr.resource_id',
