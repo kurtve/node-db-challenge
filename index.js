@@ -95,6 +95,52 @@ server.get('/api/projects_resources', async (req, res, next) => {
 
 // POST endpoints: add a resource, project, or task
 
+server.post('/api/resources', async (req, res, next) => {
+  try {
+    // create a resource
+    // ignore anything in the body that doesn't fit the model
+    const newResource = {
+      name: req.body.name,
+      description: req.body.description,
+    };
+    const [id] = await db('resources').insert(newResource);
+
+    // fetch the newly created resource
+    const resource = await db('resources')
+      .where({ id })
+      .first();
+
+    // and return it to the caller
+    res.status(201).json(resource);
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.post('/api/projects', async (req, res, next) => {
+  try {
+    // create a project
+    // ignore anything in the body that doesn't fit the model.
+    // convert 'completed' field to 0/1 values
+    const newProject = {
+      name: req.body.name,
+      description: req.body.description,
+      completed: req.body.completed === 'true' ? 1 : 0,
+    };
+    const [id] = await db('projects').insert(newProject);
+
+    // fetch the newly created resource
+    const project = await db('projects')
+      .where({ id })
+      .first();
+
+    // and return it to the caller, with 'completed' field converted to boolean
+    res.status(201).json({ ...project, completed: !!project.completed });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE endpoints: remove a resource, project, or task
 
 // PUT endpoints: update a resource, project, or task
