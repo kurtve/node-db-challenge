@@ -167,6 +167,45 @@ server.get('/api/tasks/:id', async (req, res, next) => {
   }
 });
 
+server.get('/api/projects/:id', async (req, res, next) => {
+  try {
+    // get a specific project
+    // include all associated resources and tasks in the returned object
+    const rawProject = await db('projects')
+      .where({ id: req.params.id })
+      .first();
+
+    if (rawProject) {
+      // 1. convert completed from 0/1 to false/true
+      const boolProject = { ...rawProject, completed: !!rawProject.completed };
+
+      // 2. get associated tasks
+      const tasks = await db('tasks')
+        .select('id', 'description', 'notes', 'completed')
+        .where({ project_id: req.params.id });
+      const boolTasks = tasks.map(task => ({
+        ...task,
+        completed: !!task.completed,
+      }));
+      const projectWithTasks = { ...boolProject, tasks: boolTasks };
+
+      // 3. get associated resources
+      const resources = await db('resources as r')
+        .leftJoin('projects_resources as pr', 'pr.resource_id', 'r.id')
+        .select('r.id', 'r.name', 'r.description')
+        .where({ 'pr.project_id': req.params.id });
+      const totalProject = { ...projectWithTasks, resources };
+
+      // return final result
+      res.json(totalProject);
+    } else {
+      res.status(404).json({ message: `Project ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST endpoints: add a resource, project, or task
 
 server.post('/api/resources', async (req, res, next) => {
@@ -265,6 +304,15 @@ server.post('/api/tasks', async (req, res, next) => {
 // DELETE endpoints: remove a resource, project, or task
 
 // PUT endpoints: update a resource, project, or task
+
+// global error handler
+server.use((err, req, res, next) => {
+  console.log('Error:', err);
+
+  res.status(500).json({
+    message: 'Server error',
+  });
+});
 
 // start the server
 server.listen(port, () => {
