@@ -19,7 +19,7 @@ server.get('/', (req, res, next) => {
   }
 });
 
-// GET methods: get a list of all resources, projects or tasks
+// GET endpoints: get a list of all resources, projects or tasks
 
 server.get('/api/resources', async (req, res, next) => {
   try {
@@ -45,6 +45,59 @@ server.get('/api/projects', async (req, res, next) => {
     next(err);
   }
 });
+
+server.get('/api/tasks', async (req, res, next) => {
+  try {
+    // get all tasks from the database
+    // include the project name and description
+    const tasks = await db('tasks as t')
+      .leftJoin('projects as p', 't.project_id', 'p.id')
+      .select(
+        't.id',
+        't.description',
+        't.notes',
+        't.completed',
+        'p.name as project_name',
+        'p.description as project_description'
+      );
+    // convert completed from 0/1 to false/true
+    const cleaned = tasks.map(task => ({
+      ...task,
+      completed: !!task.completed,
+    }));
+    res.json(cleaned);
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.get('/api/projects_resources', async (req, res, next) => {
+  try {
+    // get all project-resource associations from the database
+    // include the project name and resource name
+    // (wasn't asked for, but nice to have for debugging the database)
+    const projects_resources = await db('projects_resources as pr')
+      .leftJoin('projects as p', 'pr.project_id', 'p.id')
+      .leftJoin('resources as r', 'pr.resource_id', 'r.id')
+      .select(
+        'pr.project_id',
+        'p.name as project_name',
+        'pr.resource_id',
+        'r.name as resource_name'
+      );
+    res.json(projects_resources);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// more GET endpoints: get a specific resource, project, or task
+
+// POST endpoints: add a resource, project, or task
+
+// DELETE endpoints: remove a resource, project, or task
+
+// PUT endpoints: update a resource, project, or task
 
 // start the server
 server.listen(port, () => {
