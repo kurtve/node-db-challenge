@@ -94,6 +94,79 @@ server.get('/api/projects_resources', async (req, res, next) => {
 
 // more GET endpoints: get a specific resource, project, or task
 
+server.get('/api/resources/:id', async (req, res, next) => {
+  try {
+    // get a specific resource
+    const resource = await db('resources')
+      .where({ id: req.params.id })
+      .first();
+
+    if (resource) {
+      res.json(resource);
+    } else {
+      res.status(404).json({ message: `Resource ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.get('/api/projects_resources/:id', async (req, res, next) => {
+  try {
+    // get a specific project/resource link
+    const project_resource = await db('projects_resources as pr')
+      .leftJoin('projects as p', 'pr.project_id', 'p.id')
+      .leftJoin('resources as r', 'pr.resource_id', 'r.id')
+      .select(
+        'pr.id',
+        'pr.project_id',
+        'p.name as project_name',
+        'pr.resource_id',
+        'r.name as resource_name'
+      )
+      .where({ 'pr.id': req.params.id })
+      .first();
+
+    if (project_resource) {
+      res.json(project_resource);
+    } else {
+      res
+        .status(404)
+        .json({ message: `Project-Resource ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.get('/api/tasks/:id', async (req, res, next) => {
+  try {
+    // get a specific task
+    // include the project name and description
+    const task = await db('tasks as t')
+      .leftJoin('projects as p', 't.project_id', 'p.id')
+      .select(
+        't.id',
+        't.description',
+        't.notes',
+        't.completed',
+        'p.name as project_name',
+        'p.description as project_description'
+      )
+      .where({ 't.id': req.params.id })
+      .first();
+
+    if (task) {
+      // convert completed from 0/1 to false/true, and return
+      res.json({ ...task, completed: !!task.completed });
+    } else {
+      res.status(404).json({ message: `Task ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
 // POST endpoints: add a resource, project, or task
 
 server.post('/api/resources', async (req, res, next) => {
