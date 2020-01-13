@@ -303,6 +303,77 @@ server.post('/api/tasks', async (req, res, next) => {
 
 // DELETE endpoints: remove a resource, project, or task
 
+server.delete('/api/resources/:id', async (req, res, next) => {
+  try {
+    // remove the resource
+    const count = await db('resources')
+      .where({ id: req.params.id })
+      .del();
+
+    if (count > 0) {
+      res.sendStatus(204);
+    } else {
+      res.status(404).json({ message: `Resource ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.delete('/api/projects/:id', async (req, res, next) => {
+  try {
+    // remove the project
+    const count = await db('projects')
+      .where({ id: req.params.id })
+      .del();
+
+    if (count > 0) {
+      res.sendStatus(204);
+    } else {
+      res.status(404).json({ message: `Project ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.delete('/api/projects_resources/:id', async (req, res, next) => {
+  try {
+    // remove the project/resource link
+    const count = await db('projects_resources')
+      .where({ id: req.params.id })
+      .del();
+
+    if (count > 0) {
+      res.sendStatus(204);
+    } else {
+      res
+        .status(404)
+        .json({ message: `Project/Resource ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.delete('/api/tasks/:id', async (req, res, next) => {
+  try {
+    // remove the task
+    const count = await db('tasks')
+      .where({ id: req.params.id })
+      .del();
+
+    if (count > 0) {
+      res.sendStatus(204);
+    } else {
+      res.status(404).json({ message: `Task ${req.params.id} not found` });
+    }
+  } catch (err) {
+    next(err);
+  }
+});
+
+// TODO: add PUT enpoints
 // PUT endpoints: update a resource, project, or task
 
 // global error handler
