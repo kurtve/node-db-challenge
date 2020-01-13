@@ -19,6 +19,33 @@ server.get('/', (req, res, next) => {
   }
 });
 
+// GET methods: get a list of all resources, projects or tasks
+
+server.get('/api/resources', async (req, res, next) => {
+  try {
+    // get all resources from the database
+    const resources = await db('resources');
+    res.json(resources);
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.get('/api/projects', async (req, res, next) => {
+  try {
+    // get all projects from the database
+    const projects = await db('projects');
+    // convert completed from 0/1 to false/true
+    const cleaned = projects.map(proj => ({
+      ...proj,
+      completed: !!proj.completed,
+    }));
+    res.json(cleaned);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // start the server
 server.listen(port, () => {
   console.log(`Listening on http://localhost:${port}`);
