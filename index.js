@@ -141,6 +141,53 @@ server.post('/api/projects', async (req, res, next) => {
   }
 });
 
+server.post('/api/projects_resources', async (req, res, next) => {
+  try {
+    // create a project-resource relationship
+    // ignore anything in the body that doesn't fit the model
+    const newProjectResource = {
+      project_id: req.body.project_id,
+      resource_id: req.body.resource_id,
+    };
+    const [id] = await db('projects_resources').insert(newProjectResource);
+
+    // fetch the newly created item
+    const projectResource = await db('projects_resources')
+      .where({ id })
+      .first();
+
+    // and return it to the caller
+    res.status(201).json(projectResource);
+  } catch (err) {
+    next(err);
+  }
+});
+
+server.post('/api/tasks', async (req, res, next) => {
+  try {
+    // create a task
+    // ignore anything in the body that doesn't fit the model.
+    // convert 'completed' field to 0/1 values
+    const newTask = {
+      project_id: req.body.project_id,
+      description: req.body.description,
+      notes: req.body.notes,
+      completed: req.body.completed === 'true' ? 1 : 0,
+    };
+    const [id] = await db('tasks').insert(newTask);
+
+    // fetch the newly created resource
+    const task = await db('tasks')
+      .where({ id })
+      .first();
+
+    // and return it to the caller, with 'completed' field converted to boolean
+    res.status(201).json({ ...task, completed: !!task.completed });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // DELETE endpoints: remove a resource, project, or task
 
 // PUT endpoints: update a resource, project, or task

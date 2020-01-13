@@ -35,6 +35,7 @@ exports.up = async function(knex) {
   // projects_resources table
   // links projects and resources tables in many-many relationship
   await knex.schema.createTable('projects_resources', table => {
+    table.increments('id');
     table
       .integer('project_id')
       .unsigned()
@@ -51,8 +52,8 @@ exports.up = async function(knex) {
       .inTable('resources')
       .onDelete('CASCADE')
       .onUpdate('CASCADE');
-    // create primary key - force each project_id/resource_id combo to be unique
-    table.primary(['project_id', 'resource_id']);
+    // create composite key - force each project_id/resource_id combo to be unique
+    table.unique(['project_id', 'resource_id']);
   });
 
   // tasks table
