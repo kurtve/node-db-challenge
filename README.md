@@ -40,11 +40,23 @@ Demonstrate your understanding of this week's concepts by answering the followin
 
 - [ ] Explain the difference between `Relational Databases` and `SQL`.
 
+SQL is a language standard for interacting with relational databases. A relational database is software and files which maintain data in tables consisting of columns and rows and enforces relationships between tables as well as the structure of individual tables.  An RDMS or relational database management system is a software product which implements a relational database and comes in many varieties such as Oracle, Microsoft SQL Server, MySQL, Postgresql, etc.
+
+
 - [ ] Why do tables need a `primary key`?
+
+Tables use a primary key to uniquely identify each row in the table.  This is needed in order to be able to select the desired rows in a query, to specify which rows to update or delete, and to be able to define relationships between tables.
+
 
 - [ ] What is the name given to a table column that references the primary key on another table.
 
+This is referred to as a Foriegn Key.
+
+
 - [ ] What do we need in order to have a _many to many_ relationship between two tables.
+
+To define a many-to-many relationship between two tables, we need a third table called a junction or join table.  This table will have one row for each distinct pairing of keys in the original two tables.
+
 
 ## Minimum Viable Product
 
